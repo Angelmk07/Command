@@ -1,56 +1,61 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-
-public class CommandInvoker 
+namespace CommandSystem
 {
-    private Stack<Action> methodUndoStack = new Stack<Action>();
-    private Queue<Action> methodStartQueue= new Queue<Action>();
-    private int methodmaxCount;
-    private readonly Dictionary<Type, Command> _states;
-    public CommandInvoker(Tp tpCommand, CreateSmth createSmthcommand1)
+
+    public class CommandInvoker
     {
-        _states = new Dictionary<Type, Command>()
+        private Stack<Action> methodUndoStack = new Stack<Action>();
+        private Queue<Action> methodStartQueue = new Queue<Action>();
+        private int methodmaxCount;
+        private readonly Dictionary<Type, Command> _states;
+        public CommandInvoker(TpCommand tpCommand, CreateObjCommand createSmthcommand1, int value)
+        {
+            _states = new Dictionary<Type, Command>()
             {
-                {typeof(Tp), tpCommand},
-                {typeof(CreateSmth), createSmthcommand1},
+                {typeof(TpCommand), tpCommand},
+                {typeof(CreateObjCommand), createSmthcommand1},
 
             };
-    }
-    public void StartCommand<T>( Vector2 position) where T : Command
-    {
-        if (_states.ContainsKey(typeof(T)))
-        {
-            _states[typeof(T)].Invoke(position);
-            methodUndoStack.Push(_states[typeof(T)].Undo);
-
+            methodmaxCount = value;
         }
-    }
-    public void PutIn<T>(Vector2 position) where T : Command
-    {
-        if (_states.ContainsKey(typeof(T)))
+        public void StartCommand<T>(Vector2 position) where T : Command
         {
-            if(methodStartQueue.Count > methodmaxCount)
+            if (_states.ContainsKey(typeof(T)))
             {
-                methodStartQueue.Dequeue();
-            }
-            methodStartQueue.Enqueue(() => _states[typeof(T)].Invoke(position));
-            methodUndoStack.Push(_states[typeof(T)].Undo);
+                _states[typeof(T)].Invoke(position);
+                methodUndoStack.Push(_states[typeof(T)].Undo);
 
+            }
         }
-    }
-    public void InvokeAllMetods()
-    {
-        for(int i = 0; i < methodStartQueue.Count; i++)
+        public void PutIn<T>(Vector2 position) where T : Command
         {
-            methodStartQueue.Dequeue().Invoke();
+            if (_states.ContainsKey(typeof(T)))
+            {
+                if (methodStartQueue.Count > methodmaxCount)
+                {
+                    methodStartQueue.Dequeue();
+                }
+                methodStartQueue.Enqueue(() => _states[typeof(T)].Invoke(position));
+                methodUndoStack.Push(_states[typeof(T)].Undo);
+
+            }
         }
-    }
-    public void UndoLastCommand()
-    {
-        if (methodUndoStack.Count > 0)
+        public void InvokeAllMetods()
         {
-            methodUndoStack.Pop()?.Invoke();
+            for (int i = 0; i < methodStartQueue.Count; i++)
+            {
+                methodStartQueue.Dequeue().Invoke();
+            }
+        }
+        public void UndoLastCommand()
+        {
+            if (methodUndoStack.Count > 0)
+            {
+                methodUndoStack.Pop()?.Invoke();
+            }
         }
     }
+
 }

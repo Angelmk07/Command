@@ -1,20 +1,24 @@
-using System.Collections;
-using System.Collections.Generic;
+using CommandSystem;
+using PlayerSystem;
 using UnityEngine;
-
-public class Bootstrapper : MonoBehaviour
+namespace Core
 {
-    [SerializeField] private InputListener inputListener;
-    [SerializeField] private PlayerInfo playerInfo;
-    [SerializeField] private int maxMemory;
-    private CommandInvoker commandInvoker;
-    private Tp tp;
-    private CreateSmth createSmth;
-    public void Awake()
+    public class Bootstrapper : MonoBehaviour
     {
-        tp = new(playerInfo.player, maxMemory);
-        createSmth = new(playerInfo.smth, maxMemory);
-        commandInvoker = new(tp, createSmth);
-        inputListener.Constructor(commandInvoker);
+        [SerializeField] private InputListener inputListener;
+        [SerializeField] private PlayerInfo playerInfo;
+        [SerializeField] private int maxMemory;
+        [SerializeField] private int maxMemoryQueue;
+        private CommandInvoker commandInvoker;
+        private TpCommand tp;
+        private CreateObjCommand createSmth;
+        public void Awake()
+        {
+            tp = new(playerInfo.player, maxMemory);
+            createSmth = new(playerInfo.smth, maxMemory);
+            commandInvoker = new(tp, createSmth, maxMemoryQueue);
+            inputListener.Constructor(commandInvoker);
+        }
     }
+
 }

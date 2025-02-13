@@ -1,11 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-
-public interface Command
+namespace CommandSystem
 {
-    public abstract void Invoke(Vector2 position);
-    public abstract void Undo();
-    public abstract void ChangeTarget(GameObject obj);
+    public interface Command
+    {
+        public abstract void Invoke(Vector2 position);
+        public abstract void Undo();
+        public virtual void ChangeTarget(GameObject obj) { }
 
+    }
 }
+
