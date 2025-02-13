@@ -5,7 +5,8 @@ using UnityEngine;
 public class CommandInvoker 
 {
     private Stack<Action> methodUndoStack = new Stack<Action>();
-    private Action methodStart;
+    private Queue<Action> methodStartQueue= new Queue<Action>();
+    private int methodmaxCount;
     private readonly Dictionary<Type, Command> _states;
     public CommandInvoker(Tp tpCommand, CreateSmth createSmthcommand1)
     {
@@ -29,14 +30,21 @@ public class CommandInvoker
     {
         if (_states.ContainsKey(typeof(T)))
         {
-            methodStart += () =>  _states[typeof(T)].Invoke(position);
+            if(methodStartQueue.Count > methodmaxCount)
+            {
+                methodStartQueue.Dequeue();
+            }
+            methodStartQueue.Enqueue(() => _states[typeof(T)].Invoke(position));
             methodUndoStack.Push(_states[typeof(T)].Undo);
 
         }
     }
     public void InvokeAllMetods()
     {
-        methodStart?.Invoke();
+        for(int i = 0; i < methodStartQueue.Count; i++)
+        {
+            methodStartQueue.Dequeue().Invoke();
+        }
     }
     public void UndoLastCommand()
     {
